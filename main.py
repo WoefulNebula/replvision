@@ -1,5 +1,6 @@
 import disnake
 import keepalive
+import rpsButton
 import os
 import random
 from disnake.ext import commands
@@ -7,7 +8,7 @@ import json
 
 #setup - dont touch
 # client = disnake.Client()
-client = commands.Bot(command_prefix='v!')
+client = commands.Bot(command_prefix='v!', case_insensitive = True)
 # client = commands.Bot(command_prefix = "v!", description = "Vision Bot", owner_id = 530463618488336403, case_insensitive = True)
 client.remove_command('help')
 
@@ -22,6 +23,7 @@ async def help(ctx):
 	embed = disnake.Embed(title = "Help")
 	embed.add_field(name = "Flip", value = "Flips a coin heads or tails", inline=False)
 	embed.add_field(name = "Roll", value = "Rolls a dice from 1-6", inline=False)
+	embed.add_field(name = "rps", value = "Starts a game of rock paper scissors", inline = False)
 	embed.add_field(name = "Vip1", value = "Gives link to private server 1", inline=True)
 	embed.add_field(name = "Vip2", value = "Gives link to private server 2", inline=True)
 	await ctx.send(embed = embed)
@@ -78,11 +80,51 @@ async def randomgame(ctx):
 		await ctx.send("Dice")
 
 @client.command()
-async def rps(ctx):
+async def rps(ctx, other:disnake.Member):
 	if ctx.channel.id == 922681714474618891 or ctx.channel.id == 922959690336460841:
 		await ctx.send("This command is disabled in this channel")
 		return
-	await ctx.send("coming soon")
+
+	author = ctx.author
+	#int(other[3:len(other)-1])
+	
+	view1 = rpsButton.row_buttons(ctx.author.id)
+	await ctx.send(author.mention + "Choose Rock Paper or Scissors", view=view1)
+
+	view2 = rpsButton.row_buttons(other.id)
+	await ctx.send(other.mention + "Choose Rock Paper or Scissors", view=view2)
+
+	await view1.wait()
+	authorChoice = view1.value
+	await view2.wait()
+	otherChoice = view2.value
+
+	if authorChoice == otherChoice:
+		await ctx.send("**Tie**\n" + author.mention + " picked " + getMove(authorChoice) + "\n" + other.mention + " picked " + getMove(otherChoice))
+		return
+	if authorChoice == 0:
+		if otherChoice == 1:
+			await ctx.send("**" + other.mention +  " Wins!**\n" + author.mention + " picked " + getMove(authorChoice) + "\n" + other.mention + " picked " + getMove(otherChoice))
+		else:
+			await ctx.send("**" + author.mention +  " Wins!**\n" + author.mention + " picked " + getMove(authorChoice) + "\n" + other.mention + " picked " + getMove(otherChoice))
+	elif authorChoice == 1:
+		if otherChoice == 0:
+			await ctx.send("**" + author.mention +  " Wins!**\n" + author.mention + " picked " + getMove(authorChoice) + "\n" + other.mention + " picked " + getMove(otherChoice))
+		else:
+			await ctx.send("**" + other.mention +  " Wins!**\n" + author.mention + " picked " + getMove(authorChoice) + "\n" + other.mention + " picked " + getMove(otherChoice))
+	elif authorChoice == 2:
+		if otherChoice == 0:
+			await ctx.send("**" + other.mention +  " Wins!**\n" + author.mention + " picked " + getMove(authorChoice) + "\n" + other.mention + " picked " + getMove(otherChoice))
+		else:
+			await ctx.send("**" + author.mention +  " Wins!**\n" + author.mention + " picked " + getMove(authorChoice) + "\n" + other.mention + " picked " + getMove(otherChoice))
+	
+def getMove(value):
+	if value == 0:
+		return "Rock"
+	elif value == 1:
+		return "Paper"
+	elif value == 2:
+		return "Scissors"
 
 #util
 @client.command()
@@ -138,10 +180,9 @@ async def reset(ctx):
 	if author != 248872936159707137 and author != 820741900293898340 and author != 530463618488336403:
 		await ctx.send("You are not authorized to do that!")
 	else:
-		# confirmation = ctx.send("Are you sure you want to do this?")
-		# await confirmation.add_reaction("👍")
-		# await confirmation.add_reaction("👎")
-		# confirmation.on_reaction_add("👍")
+		confirmation = ctx.send("Are you sure you want to do this?")
+		await confirmation.add_reaction("👍")
+		await client.wait_for("reaction", timeout=30)
 		#open file
 		with open('mmfeelog.json') as f:
 			data = json.load(f)
