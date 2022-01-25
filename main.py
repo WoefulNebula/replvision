@@ -126,6 +126,10 @@ def getMove(value):
 	elif value == 2:
 		return "Scissors"
 
+@client.command()
+async def blackjack(ctx, other:disnake.Member):
+	await ctx.send("Coming Soon!")
+
 #util
 @client.command()
 async def vip1(ctx):
@@ -134,6 +138,10 @@ async def vip1(ctx):
 @client.command()
 async def vip2(ctx):
 	await ctx.send("https://www.roblox.com/games/379614936?privateServerLinkCode=93798779146153753504990887689622")
+
+@client.command()
+async def values(ctx):
+	await ctx.send("http://bit.ly/AssassinValues")
 
 #moderation
 @client.command() 
@@ -163,7 +171,7 @@ async def log(ctx, value):
 			
 			#confirmation
 			await ctx.send("Welcome "+ user['name'] + ". You haved logged " + value + ", you have a total of "+ str(user['total']) + " logged.")
-			embed = disnake.Embed(title = user['name'], description = value + " value logged.")
+			embed = disnake.Embed(title = user['name'], description = value + " value logged.\n" + str(user['total']) + " total")
 			channel = client.get_channel(922892534928257054)
 			await channel.send(embed=embed)
 			
